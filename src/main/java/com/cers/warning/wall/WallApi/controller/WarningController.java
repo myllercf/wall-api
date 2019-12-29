@@ -2,16 +2,25 @@ package com.cers.warning.wall.WallApi.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.jboss.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cers.warning.wall.WallApi.WarningDTO;
 import com.cers.warning.wall.WallApi.converter.WarningConverter;
+import com.cers.warning.wall.WallApi.dto.WarningDTO;
+import com.cers.warning.wall.WallApi.dto.WarningPageableDTO;
 import com.cers.warning.wall.WallApi.persistence.WarningEntity;
 import com.cers.warning.wall.WallApi.service.IWarningService;
 
@@ -28,11 +37,37 @@ public class WarningController {
 	private WarningConverter converter;
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public ResponseEntity<List<WarningDTO>> listWarning(){
-		logger.info("[WarningController.listWarning] Rest call to list warning.");
-		List<WarningEntity> list = warningService.listWarning();
+	public ResponseEntity<List<WarningPageableDTO>> getAllWarningPaged(
+			@RequestParam(defaultValue = "0") Integer pageNumber, 
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(defaultValue = "id") String sortBy){
+		logger.info("[WarningController.getAllWarningPaged] Rest call to list warning.");
+		
+		Page<WarningEntity> list = warningService.getAllWarningPaged(pageNumber, pageSize, sortBy);
 		return new ResponseEntity<>(
-				converter.convertToDTO(list), HttpStatus.OK);
+				converter.convertToPageableDTO(list), HttpStatus.OK);
 	}
-
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<WarningDTO> getWarning(
+			@PathVariable(value = "id") Long id){
+		logger.infof("[WarningController.getWarning] Rest call to get warning by id: {}.", id);
+		
+		WarningEntity entity = warningService.getWarning(id);
+		return new ResponseEntity<>(
+				converter.convertToDTO(entity), HttpStatus.OK);
+	}
+	
+	@PutMapping("/{id}")
+	public ResponseEntity<WarningDTO> updateWarning(
+			@PathVariable(value = "id") Long id
+			, @Valid @RequestBody WarningDTO dto){
+		logger.infof("[WarningController.updateWarning] Rest call to update warning by id: {}.", id);
+		
+		WarningEntity entity = warningService.updateWarning(
+				id, converter.convertToEntity(dto));
+		
+		return new ResponseEntity<>(
+				converter.convertToDTO(entity), HttpStatus.OK);
+	}
 }

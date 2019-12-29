@@ -1,11 +1,15 @@
 package com.cers.warning.wall.WallApi.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 import com.cers.warning.wall.WallApi.persistence.WarningEntity;
 
 public interface IWarningService {
 	
-	public List<WarningEntity> listWarning();
+	public Page<WarningEntity> getAllWarningPaged(Integer pageNumber, Integer pageSize, String sortBy);
+
+	public WarningEntity getWarning(Long id);
+	
+	public WarningEntity updateWarning(Long id, WarningEntity warning);
 
 }

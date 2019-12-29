@@ -1,4 +1,4 @@
-package com.cers.warning.wall.WallApi;
+package com.cers.warning.wall.WallApi.dto;
 
 import java.util.Date;
 
