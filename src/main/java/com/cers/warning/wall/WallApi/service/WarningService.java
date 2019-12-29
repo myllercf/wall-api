@@ -11,9 +11,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.cers.warning.wall.WallApi.BusinessException;
+import com.cers.warning.wall.WallApi.exception.BusinessException;
+import com.cers.warning.wall.WallApi.exception.EntityNotFoundException;
+import com.cers.warning.wall.WallApi.exception.MissingInformationException;
 import com.cers.warning.wall.WallApi.persistence.WarningEntity;
 import com.cers.warning.wall.WallApi.persistence.WarningRepository;
+import com.cers.warning.wall.WallApi.util.Util;
 
 @Service
 public class WarningService implements IWarningService{
@@ -54,13 +57,30 @@ public class WarningService implements IWarningService{
 		newWarning.setId(recovered.getId());		
 		return warningRepository.save(newWarning);
 	}
+	
+	@Override
+	public WarningEntity createWarning(WarningEntity warning) {
+		logger.infof("[WarningService.createWarning] Create a new Warning with the object: {}.", warning);		
+		validateNewWarning(warning);		
+		return warningRepository.save(warning);
+	}
+	
+	@Override
+	public void deleteWarning(Long id) {
+		logger.infof("[WarningService.deleteWarning] Delete a Warning by id: {}.", id);
+		try {
+			warningRepository.deleteById(id);
+		}catch(Exception e){
+			throw new BusinessException("Warning deletion failed.", e);
+		}
+	}
 
 	private WarningEntity convertOptionalToEntity(Optional<WarningEntity> warningOptional) {
 		logger.infof("[WarningService.convertOptionalToEntity] Convert an optional object: {} into entity."
 				, warningOptional);
 
 		if(!warningOptional.isPresent()) {
-			throw new BusinessException("The Warning was not found.");
+			throw new EntityNotFoundException("The Warning was not found.");
 		}
 		return warningOptional.get();
 	}
@@ -69,6 +89,15 @@ public class WarningService implements IWarningService{
 		logger.infof("[WarningService.markVisualizedWarning] Marking Warning as viewed.", id);
 		warning.setViewDate(new Date());
 		this.updateWarning(id, warning);
+	}
+	
+	private void validateNewWarning(WarningEntity warning) {
+		logger.infof("[WarningService.validateNewWarning] Validate with new Warning has required informations .", warning);
+		if(warning == null 
+				|| Util.stringIsNullOrEmpty(warning.getTitle())
+				|| warning.getDescription().isEmpty()) {
+			throw new MissingInformationException("Some information are required.");
+		}
 	}
 
 }

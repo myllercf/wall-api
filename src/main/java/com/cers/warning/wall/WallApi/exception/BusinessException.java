@@ -1,4 +1,4 @@
-package com.cers.warning.wall.WallApi;
+package com.cers.warning.wall.WallApi.exception;
 
 public class BusinessException extends RuntimeException{
 	
@@ -6,6 +6,10 @@ public class BusinessException extends RuntimeException{
 
 	public BusinessException(String message) {
 		super(message);
+	}
+	
+	public BusinessException(String message, Throwable e) {
+		super(message, e);
 	}
 
 }

@@ -12,4 +12,8 @@ public interface IWarningService {
 	
 	public WarningEntity updateWarning(Long id, WarningEntity warning);
 
+	public WarningEntity createWarning(WarningEntity warning);
+
+	public void deleteWarning(Long id);
+
 }

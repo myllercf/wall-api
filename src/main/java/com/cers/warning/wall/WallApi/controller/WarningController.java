@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,4 +72,25 @@ public class WarningController {
 		return new ResponseEntity<>(
 				converter.convertToDTO(entity), HttpStatus.OK);
 	}
+	
+	@PostMapping
+	public ResponseEntity<WarningDTO> createWarning(
+			@Valid @RequestBody WarningDTO dto) {
+		logger.infof("[Controller.createWarning] - Rest call to create warning with the object: {}.", dto);
+		
+		WarningEntity entity = warningService.createWarning(
+				converter.convertToEntity(dto));
+		
+		return new ResponseEntity<>(
+				converter.convertToDTO(entity), HttpStatus.CREATED);
+	}
+	
+	@DeleteMapping("/{id}")
+	public ResponseEntity<String> deleteWarning(
+			@PathVariable(value = "id") Long id){
+		logger.infof("[Controller.deleteWarning] - Rest call to delete warning by id: {}.", id);
+		warningService.deleteWarning(id);
+		return new ResponseEntity<>("Warning deleted.", HttpStatus.NO_CONTENT);
+	}
+	
 }
