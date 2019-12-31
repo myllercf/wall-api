@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.cers.warning.wall.WallApi.exception.BusinessException;
 import com.cers.warning.wall.WallApi.exception.EntityNotFoundException;
@@ -18,6 +19,7 @@ import com.cers.warning.wall.WallApi.persistence.WarningEntity;
 import com.cers.warning.wall.WallApi.persistence.WarningRepository;
 import com.cers.warning.wall.WallApi.util.Util;
 
+@CrossOrigin("*")
 @Service
 public class WarningService implements IWarningService{
 
@@ -60,7 +62,8 @@ public class WarningService implements IWarningService{
 	
 	@Override
 	public WarningEntity createWarning(WarningEntity warning) {
-		logger.infof("[WarningService.createWarning] Create a new Warning with the object: {}.", warning);		
+		logger.infof("[WarningService.createWarning] Create a new Warning with the object: {}.", warning);
+		warning.setPublishDate(new Date());
 		validateNewWarning(warning);		
 		return warningRepository.save(warning);
 	}
@@ -87,8 +90,11 @@ public class WarningService implements IWarningService{
 	
 	private void markVisualizedWarning(Long id, WarningEntity warning) {
 		logger.infof("[WarningService.markVisualizedWarning] Marking Warning as viewed.", id);
-		warning.setViewDate(new Date());
-		this.updateWarning(id, warning);
+		
+		if(warning.getViewDate() == null) {
+			warning.setViewDate(new Date());
+			this.updateWarning(id, warning);
+		}
 	}
 	
 	private void validateNewWarning(WarningEntity warning) {
